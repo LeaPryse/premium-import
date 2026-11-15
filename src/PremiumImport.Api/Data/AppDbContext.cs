@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PremiumImport.Api.Domain;
 
 namespace PremiumImport.Api.Data;
 
@@ -7,6 +8,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<PremiumMethod> PremiumMethods => Set<PremiumMethod>();
     public DbSet<Metric> Metrics => Set<Metric>();
     public DbSet<MetricField> MetricFields => Set<MetricField>();
+    public DbSet<MetricFieldAlias> MetricFieldAliases => Set<MetricFieldAlias>();
     public DbSet<MetricSchemaVersion> MetricSchemaVersions => Set<MetricSchemaVersion>();
     public DbSet<MetricSchemaColumn> MetricSchemaColumns => Set<MetricSchemaColumn>();
     public DbSet<ImportBatch> ImportBatches => Set<ImportBatch>();
@@ -15,52 +17,23 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<PremiumMethod>()
-            .HasIndex(x => x.Number).IsUnique();
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-        modelBuilder.Entity<Metric>()
-            .HasIndex(x => new { x.PremiumMethodId, x.Name }).IsUnique();
+        // SQLite has no DECIMAL type (EF stores it as TEXT, which sorts/compares as text).
+        // For SQLite only, store numeric values as REAL so range filters, ORDER BY and MIN/MAX work.
+        // On SQL Server the column stays DECIMAL(18,4).
+        if (Database.IsSqlite())
+            modelBuilder.Entity<ImportedValue>().Property(x => x.NumberValue).HasConversion<double?>();
+    }
 
-        modelBuilder.Entity<MetricField>()
-            .HasIndex(x => new { x.MetricId, x.Key }).IsUnique();
-        modelBuilder.Entity<MetricField>()
-            .HasIndex(x => new { x.MetricId, x.IsRelevant });
-
-        modelBuilder.Entity<MetricSchemaVersion>()
-            .HasIndex(x => new { x.MetricId, x.Fingerprint }).IsUnique();
-        modelBuilder.Entity<MetricSchemaVersion>()
-            .HasIndex(x => new { x.MetricId, x.VersionNumber }).IsUnique();
-
-        modelBuilder.Entity<MetricSchemaColumn>()
-            .HasIndex(x => new { x.SchemaVersionId, x.Ordinal }).IsUnique();
-        modelBuilder.Entity<MetricSchemaColumn>()
-            .HasIndex(x => new { x.SchemaVersionId, x.MetricFieldId }).IsUnique();
-
-        modelBuilder.Entity<ImportBatch>()
-            .HasIndex(x => new { x.MetricId, x.ReportingYear, x.ReportingPeriod, x.StartedAtUtc });
-        modelBuilder.Entity<ImportBatch>()
-            .HasIndex(x => new { x.MetricId, x.Status });
-
-        modelBuilder.Entity<ImportedRow>()
-            .HasIndex(x => new { x.ImportBatchId, x.SourceRowNumber }).IsUnique();
-
-        modelBuilder.Entity<ImportedValue>()
-            .HasIndex(x => new { x.ImportedRowId, x.MetricFieldId }).IsUnique();
-        modelBuilder.Entity<ImportedValue>()
-            .HasIndex(x => new { x.MetricFieldId, x.TextValue });
-        modelBuilder.Entity<ImportedValue>()
-            .HasIndex(x => new { x.MetricFieldId, x.NumberValue });
-        modelBuilder.Entity<ImportedValue>()
-            .HasIndex(x => new { x.MetricFieldId, x.DateValue });
-
-        modelBuilder.Entity<Metric>()
-            .HasOne(x => x.PremiumMethod).WithMany(x => x.Metrics)
-            .HasForeignKey(x => x.PremiumMethodId).OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<MetricSchemaColumn>()
-            .HasOne(x => x.MetricField).WithMany(x => x.SchemaColumns)
-            .HasForeignKey(x => x.MetricFieldId).OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<ImportBatch>()
-            .HasOne(x => x.SchemaVersion).WithMany(x => x.ImportBatches)
-            .HasForeignKey(x => x.SchemaVersionId).OnDelete(DeleteBehavior.Restrict);
+    protected override void ConfigureConventions(ModelConfigurationBuilder builder)
+    {
+        // Enums are stored as readable strings (e.g. 'Number', 'Quarter') - easier to query in plain SQL.
+        builder.Properties<DataType>().HaveConversion<string>().HaveMaxLength(20);
+        builder.Properties<SourceType>().HaveConversion<string>().HaveMaxLength(20);
+        builder.Properties<PeriodType>().HaveConversion<string>().HaveMaxLength(20);
+        builder.Properties<Frequency>().HaveConversion<string>().HaveMaxLength(20);
+        builder.Properties<ImportStatus>().HaveConversion<string>().HaveMaxLength(20);
+        builder.Properties<decimal>().HavePrecision(18, 4);
     }
 }

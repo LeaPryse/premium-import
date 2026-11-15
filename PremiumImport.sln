@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{35F947CD-E69
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PremiumImport.Api", "src\PremiumImport.Api\PremiumImport.Api.csproj", "{D18E496E-05DF-42D9-B072-CF01318EEAC1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{1A972088-FF1C-44BB-B8FB-0689D89F6BE1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleDataGenerator", "tools\SampleDataGenerator\SampleDataGenerator.csproj", "{B20A2641-0B80-4AB0-A29D-E69CB68DDCBA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +24,13 @@ Global
 		{D18E496E-05DF-42D9-B072-CF01318EEAC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D18E496E-05DF-42D9-B072-CF01318EEAC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D18E496E-05DF-42D9-B072-CF01318EEAC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B20A2641-0B80-4AB0-A29D-E69CB68DDCBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B20A2641-0B80-4AB0-A29D-E69CB68DDCBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B20A2641-0B80-4AB0-A29D-E69CB68DDCBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B20A2641-0B80-4AB0-A29D-E69CB68DDCBA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D18E496E-05DF-42D9-B072-CF01318EEAC1} = {35F947CD-E696-4DFF-B87D-A34061E81D61}
+		{B20A2641-0B80-4AB0-A29D-E69CB68DDCBA} = {1A972088-FF1C-44BB-B8FB-0689D89F6BE1}
 	EndGlobalSection
 EndGlobal

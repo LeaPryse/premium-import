@@ -1,6 +1,28 @@
-@PremiumImport.Api_HostAddress = http://localhost:5045
+@api = http://localhost:5000/api
 
-GET {{PremiumImport.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Premium methods
+GET {{api}}/premium-methods
 
-###
+### Create premium method
+POST {{api}}/premium-methods
+Content-Type: application/json
+
+{ "number": "PR-2027", "description": "פרמיה חודשית", "premiumPercent": 5, "calculationPeriod": "month" }
+
+### Metrics of method 1
+GET {{api}}/premium-methods/1/metrics
+
+### Field dictionary of metric 1
+GET {{api}}/metrics/1/fields
+
+### File structure history of metric 1
+GET {{api}}/metrics/1/schema-versions
+
+### Import history of metric 1
+GET {{api}}/metrics/1/imports
+
+### Rows: page 1, sorted by department, filtered by status
+GET {{api}}/metrics/1/rows?page=1&pageSize=25&sortBy=מחלקה&filters[סטטוס]==פעיל
+
+### Filter options of a field
+GET {{api}}/metrics/1/fields/4/filter-options
