@@ -1,0 +1,49 @@
+<section class="card selection-card" aria-labelledby="selection-title">
+  <div class="section-title-row">
+    <div class="section-icon purple">⌕</div>
+    <div>
+      <h2 id="selection-title">בחירת שיטה ומדד</h2>
+      <p>בחרו את המדד לצפייה בנתונים או לקליטת קובץ חדש</p>
+    </div>
+  </div>
+
+  <div class="selection-grid">
+    <label class="form-field">
+      <span>שיטת פרמיה</span>
+      <select (change)="store.selectMethod(toId($event))">
+        <option value="" [selected]="store.selectedMethodId() === null">בחרו שיטת פרמיה</option>
+        @for (method of store.methods(); track method.id) {
+          <option [value]="method.id" [selected]="method.id === store.selectedMethodId()">{{ method.number }} — {{ method.description }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="form-field">
+      <span>מדד</span>
+      <select (change)="store.selectMetric(toId($event))" [disabled]="store.metrics().length === 0">
+        <option value="" [selected]="store.selectedMetricId() === null">בחרו מדד</option>
+        @for (metric of store.metrics(); track metric.id) {
+          <option [value]="metric.id" [selected]="metric.id === store.selectedMetricId()">{{ metric.name }}</option>
+        }
+      </select>
+    </label>
+
+    <div class="selection-note">
+      <span class="note-icon">i</span>
+      <span>הנתונים מוצגים לפי הגדרות המבנה והשדות של המדד שנבחר.</span>
+    </div>
+  </div>
+
+  @if (store.selectedMetric(); as metric) {
+    <div class="metric-meta">
+      <span class="meta-label">מקור נתונים</span>
+      <span class="source-tag"><span class="excel-icon">X</span> {{ sourceLabels[metric.sourceType] }} · {{ metric.sourceName }}</span>
+      <span class="meta-divider"></span>
+      <span class="meta-label">תדירות קליטה</span>
+      <strong>{{ frequencyLabels[metric.ingestionFrequency] }}</strong>
+      <span class="meta-divider"></span>
+      <span class="meta-label">שדות במבנה</span>
+      <strong>{{ metric.fieldCount }}</strong>
+    </div>
+  }
+</section>

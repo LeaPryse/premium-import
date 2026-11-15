@@ -1,0 +1,47 @@
+@if (store.filterableFields().length > 0) {
+  <form class="filters-panel" [formGroup]="form()" (ngSubmit)="$event.preventDefault()">
+    <div class="filters-label"><span class="filter-icon">☷</span> סינון נתונים</div>
+
+    @for (field of store.filterableFields(); track field.id) {
+      <div class="filter-field" [class.range]="field.dataType === 'number' || field.dataType === 'date'">
+        <span>{{ field.displayName }}</span>
+
+        @switch (field.dataType) {
+          @case ('number') {
+            <div class="range-inputs" [formGroup]="group(field.key)">
+              <input type="number" step="any" formControlName="from" [placeholder]="rangeHint(field, 'min')" [attr.aria-label]="field.displayName + ' מ-'">
+              <input type="number" step="any" formControlName="to" [placeholder]="rangeHint(field, 'max')" [attr.aria-label]="field.displayName + ' עד'">
+            </div>
+          }
+          @case ('date') {
+            <div class="range-inputs" [formGroup]="group(field.key)">
+              <input type="date" formControlName="from" [attr.aria-label]="field.displayName + ' מתאריך'">
+              <input type="date" formControlName="to" [attr.aria-label]="field.displayName + ' עד תאריך'">
+            </div>
+          }
+          @case ('boolean') {
+            <select [formControlName]="field.key">
+              <option value="">הכל</option>
+              <option value="true">כן</option>
+              <option value="false">לא</option>
+            </select>
+          }
+          @default {
+            <input type="text" [formControlName]="field.key" [attr.list]="'options-' + field.id" [placeholder]="'חיפוש ב' + field.displayName">
+            <datalist [id]="'options-' + field.id">
+              @for (option of suggestions(field); track option) {
+                <option [value]="option"></option>
+              }
+            </datalist>
+          }
+        }
+      </div>
+    }
+
+    <div class="filter-actions">
+      @if (hasActiveFilters()) {
+        <button class="text-button" type="button" (click)="reset()">ניקוי סינון</button>
+      }
+    </div>
+  </form>
+}

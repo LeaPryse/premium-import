@@ -1,3 +1,45 @@
 * { box-sizing: border-box; }
-body { margin: 0; font-family: Arial, "Segoe UI", sans-serif; background: #f5f6fa; -webkit-font-smoothing: antialiased; }
+body { margin: 0; font-family: Arial, "Segoe UI", sans-serif; background: #f5f6fa; color: #25283a; -webkit-font-smoothing: antialiased; }
 button, input, select { font-family: inherit; }
+
+/* ---------- shared building blocks ---------- */
+.card { background: #fff; border: 1px solid #e9eaf0; border-radius: 10px; box-shadow: 0 2px 8px #28234606; margin-bottom: 16px; }
+.section-title-row { display: flex; align-items: center; gap: 12px; }
+.section-title-row h2 { margin: 0 0 4px; font-size: 15px; }
+.section-title-row p { margin: 0; color: #9295a5; font-size: 12px; }
+.section-icon { width: 35px; height: 35px; flex: 0 0 35px; border-radius: 9px; display: grid; place-items: center; font-size: 20px; font-weight: 500; }
+.section-icon.purple { background: #f1edff; color: #765bd5; }
+.section-icon.green { background: #e8f7f0; color: #36a979; }
+.section-icon.blue { background: #eaf3ff; color: #4381d6; }
+
+.form-field, .filter-field { display: flex; flex-direction: column; gap: 7px; color: #55596b; font-size: 11px; }
+.form-field select, .form-field input, .filter-field select, .filter-field input {
+  width: 100%; height: 38px; border: 1px solid #e1e3eb; border-radius: 6px;
+  background-color: #fff; color: #33364a; padding: 0 11px; outline: none; font-size: 12px;
+}
+.form-field select:focus, .form-field input:focus, .filter-field select:focus, .filter-field input:focus {
+  border-color: #8d78e4; box-shadow: 0 0 0 2px #8d78e41c;
+}
+select:disabled, input:disabled { background: #f7f7fa; color: #a4a6b1; cursor: not-allowed; }
+.required { color: #db5c70; }
+.field-error { color: #bb4955; font-size: 10px; }
+
+.primary-button { border: 0; border-radius: 6px; padding: 0 17px; height: 38px; color: #fff; background: #7055d3; font-weight: 600; font-size: 11px; cursor: pointer; white-space: nowrap; transition: background .15s ease; }
+.primary-button:hover:not(:disabled) { background: #6045c1; }
+.primary-button:disabled { opacity: .6; cursor: not-allowed; }
+.small-button { height: 31px; padding: 0 11px; font-size: 10px; }
+.text-button { border: 0; background: transparent; color: #777a8a; font-size: 10px; cursor: pointer; white-space: nowrap; }
+.text-button:hover { color: #5e47bc; }
+
+.alert { display: flex; align-items: center; gap: 9px; border-radius: 7px; margin-bottom: 13px; padding: 10px 13px; font-size: 11px; }
+.error-alert { border: 1px solid #f3d4d7; background: #fff7f7; color: #a84550; }
+.success-alert { border: 1px solid #ccebdc; background: #f2fbf6; color: #287c58; }
+.alert-icon { width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; font-weight: 700; background: #f9e3e5; }
+.success-icon { width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; font-weight: 700; background: #dbf4e7; }
+.dismiss-button { margin-right: auto; padding: 0 5px; border: 0; background: transparent; color: inherit; font-size: 17px; cursor: pointer; }
+
+.excel-icon { width: 15px; height: 15px; display: inline-grid; place-items: center; border-radius: 3px; color: #fff; background: #35a16a; font-size: 9px; font-weight: 700; }
+
+.spinner { width: 12px; height: 12px; display: inline-block; border: 2px solid #ffffff80; border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; }
+.dark-spinner { border-color: #e3def7; border-top-color: #7055d3; }
+@keyframes spin { to { transform: rotate(360deg); } }

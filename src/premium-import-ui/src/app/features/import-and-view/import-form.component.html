@@ -1,0 +1,65 @@
+<section class="card upload-card" aria-labelledby="upload-title">
+  <div class="section-title-row">
+    <div class="section-icon green">↑</div>
+    <div>
+      <h2 id="upload-title">קליטת קובץ</h2>
+      <p>הקובץ ייבדק ויקושר אוטומטית לגרסת המבנה המתאימה</p>
+    </div>
+    <span class="optional-badge">XLSX / XLS / CSV</span>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="upload-grid">
+      <label class="form-field">
+        <span>שנת דיווח <b class="required">*</b></span>
+        <input type="number" formControlName="reportingYear">
+        @if (form.controls.reportingYear.touched && form.controls.reportingYear.invalid) {
+          <small class="field-error">יש להזין שנה בין 2000 ל-2100</small>
+        }
+      </label>
+
+      <label class="form-field">
+        <span>סוג תקופה <b class="required">*</b></span>
+        <select formControlName="periodType">
+          @for (type of periodTypes; track type.value) {
+            <option [value]="type.value">{{ type.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="form-field">
+        <span>תקופה <b class="required">*</b></span>
+        <select formControlName="periodNumber">
+          @for (option of periodNumbers(); track option.value) {
+            <option [ngValue]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="form-field file-field" for="data-file">
+        <span>קובץ נתונים <b class="required">*</b></span>
+        <span class="file-control">
+          <span class="choose-file">בחירת קובץ</span>
+          <span class="file-name">{{ form.controls.file.value?.name || 'לא נבחר קובץ' }}</span>
+        </span>
+        <input #fileInput id="data-file" type="file" accept=".xlsx,.xls,.csv" (change)="onFileChange($event)">
+        @if (form.controls.file.touched && form.controls.file.errors?.['extension']) {
+          <small class="field-error">יש לבחור קובץ Excel (‎.xlsx / ‎.xls) או CSV</small>
+        }
+      </label>
+
+      <button class="primary-button upload-button" type="submit" [disabled]="uploading() || disabled()">
+        @if (uploading()) {
+          <span class="spinner"></span> הקובץ נקלט...
+        } @else {
+          <span>↑</span> קליטת נתונים
+        }
+      </button>
+    </div>
+  </form>
+
+  <div class="upload-hint">
+    <span class="hint-icon">✓</span>
+    הקובץ חייב לכלול שורת כותרות ייחודית. קליטה חוזרת לאותה תקופה מחליפה את הקודמת בתצוגה (הקודמת נשמרת בהיסטוריה).
+  </div>
+</section>

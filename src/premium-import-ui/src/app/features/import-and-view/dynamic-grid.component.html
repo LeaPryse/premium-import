@@ -1,0 +1,62 @@
+<div class="table-wrap" [class.is-loading]="store.loadingRows() && store.rows().length > 0">
+  <table>
+    <thead>
+      <tr>
+        <th class="row-number">#</th>
+        @for (field of store.visibleFields(); track field.id) {
+          <th [attr.aria-sort]="store.query().sortBy === field.key ? (store.query().descending ? 'descending' : 'ascending') : null">
+            <button type="button" class="sort-button" [disabled]="!field.isSortable" (click)="store.sortBy(field)">
+              {{ field.displayName }}
+              @if (store.query().sortBy === field.key) {
+                <span class="sort-indicator">{{ store.query().descending ? '↓' : '↑' }}</span>
+              } @else if (field.isSortable) {
+                <span class="sort-hint">↕</span>
+              }
+            </button>
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @if (store.loadingRows() && store.rows().length === 0) {
+        <tr><td class="empty-state" [attr.colspan]="store.visibleFields().length + 1"><span class="spinner dark-spinner"></span> טוען נתונים...</td></tr>
+      } @else if (store.rows().length === 0) {
+        <tr>
+          <td class="empty-state" [attr.colspan]="store.visibleFields().length + 1">
+            <span class="empty-icon">▤</span>
+            <strong>לא נמצאו רשומות</strong>
+            <span>בחרו מדד, שנו את הסינון, או העלו קובץ חדש.</span>
+          </td>
+        </tr>
+      } @else {
+        @for (row of store.rows(); track trackRow($index, row)) {
+          <tr>
+            <td class="row-number">{{ firstRow() + $index }}</td>
+            @for (field of store.visibleFields(); track field.id) {
+              <td [class.numeric]="isNumeric(field)">{{ format(field, row.values[field.key]) }}</td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+
+<footer class="table-footer">
+  <span>מציג {{ firstRow() }}–{{ lastRow() }} מתוך {{ store.totalCount().toLocaleString('he-IL') }} רשומות</span>
+  <label class="page-size">
+    <span>שורות בעמוד</span>
+    <select (change)="pageSizeChanged($event)">
+      @for (size of pageSizes; track size) {
+        <option [value]="size" [selected]="size === store.query().pageSize">{{ size }}</option>
+      }
+    </select>
+  </label>
+  <div class="pagination">
+    <button type="button" [disabled]="store.query().page <= 1 || store.loadingRows()" (click)="store.goToPage(1)">ראשון</button>
+    <button type="button" [disabled]="store.query().page <= 1 || store.loadingRows()" (click)="store.goToPage(store.query().page - 1)">הקודם</button>
+    <span>עמוד <strong>{{ store.query().page }}</strong> מתוך {{ store.pageCount().toLocaleString('he-IL') }}</span>
+    <button type="button" [disabled]="store.query().page >= store.pageCount() || store.loadingRows()" (click)="store.goToPage(store.query().page + 1)">הבא</button>
+    <button type="button" [disabled]="store.query().page >= store.pageCount() || store.loadingRows()" (click)="store.goToPage(store.pageCount())">אחרון</button>
+  </div>
+</footer>

@@ -1,0 +1,58 @@
+<div class="page-heading">
+  <div>
+    <h1>קליטת נתונים למדד</h1>
+    <p>העלאת קובצי Excel, מעקב אחר קליטות וצפייה בנתונים</p>
+  </div>
+</div>
+
+@if (store.error()) {
+  <div class="alert error-alert" role="alert">
+    <span class="alert-icon">!</span>
+    <span>{{ store.error() }}</span>
+    <button type="button" class="dismiss-button" aria-label="סגור הודעה" (click)="store.dismissMessages()">×</button>
+  </div>
+}
+@if (store.success()) {
+  <div class="alert success-alert" role="status">
+    <span class="success-icon">✓</span>
+    <span>{{ store.success() }}</span>
+    <button type="button" class="dismiss-button" aria-label="סגור הודעה" (click)="store.dismissMessages()">×</button>
+  </div>
+}
+
+<app-metric-selector />
+
+<app-import-form
+  [uploading]="store.uploading()"
+  [disabled]="!store.selectedMetric() || store.selectedMetric()?.sourceType !== 'excel'"
+  [defaultPeriodType]="store.selectedMethod()?.calculationPeriod ?? 'quarter'"
+  (submitted)="store.upload($event)" />
+
+<section class="card data-card" aria-labelledby="data-title">
+  <div class="data-heading">
+    <div class="section-title-row">
+      <div class="section-icon blue">▤</div>
+      <div>
+        <h2 id="data-title">נתונים שנקלטו</h2>
+        <p>צפייה, סינון ומיון של רשומות המדד</p>
+      </div>
+    </div>
+    <div class="data-actions">
+      <label class="batch-select">
+        <span>תצוגה</span>
+        <select (change)="onBatchChange($event)" [disabled]="store.completedBatches().length === 0">
+          <option value="" [selected]="store.query().batchId === null">הקליטה האחרונה בכל תקופה</option>
+          @for (batch of store.completedBatches(); track batch.id) {
+            <option [value]="batch.id" [selected]="store.query().batchId === batch.id">{{ batchLabel(batch) }}</option>
+          }
+        </select>
+      </label>
+      <span class="total-badge">{{ store.totalCount().toLocaleString('he-IL') }} רשומות</span>
+    </div>
+  </div>
+
+  <app-dynamic-filters />
+  <app-dynamic-grid />
+</section>
+
+<app-import-history />

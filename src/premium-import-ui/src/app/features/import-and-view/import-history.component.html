@@ -1,0 +1,28 @@
+<section class="history-section" aria-labelledby="history-title">
+  <h2 id="history-title">היסטוריית קליטות</h2>
+  <div class="history-list">
+    @for (batch of store.batches(); track batch.id) {
+      <button class="history-item" type="button"
+              [class.selected]="store.query().batchId === batch.id"
+              [disabled]="batch.status !== 'completed'"
+              [title]="batch.errorMessage ?? ''"
+              (click)="store.setBatch(batch.id)">
+        <span class="history-status" [class.failed]="batch.status === 'failed'">{{ batch.status === 'completed' ? '✓' : '!' }}</span>
+        <span class="history-file">{{ batch.originalFileName }}</span>
+        <span class="history-period">{{ period(batch) }}</span>
+        <span class="history-count">{{ batch.rowCount.toLocaleString('he-IL') }} שורות</span>
+        <span class="history-version">מבנה v{{ batch.schemaVersion }}</span>
+        <span class="history-state">
+          @if (batch.status !== 'completed') {
+            <span class="tag failed">{{ statusLabels[batch.status] }}</span>
+          } @else if (batch.isSuperseded) {
+            <span class="tag superseded">הוחלפה</span>
+          }
+        </span>
+        <time>{{ batch.startedAtUtc + 'Z' | date: 'dd/MM/yyyy HH:mm' }}</time>
+      </button>
+    } @empty {
+      <p class="history-empty">היסטוריית הקליטות תופיע כאן לאחר קליטת קובץ.</p>
+    }
+  </div>
+</section>
