@@ -1,0 +1,257 @@
+<div class="app-shell" dir="rtl">
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="דף הבית">
+      <span class="brand-mark">פ</span>
+      <span>פרמיה<span class="brand-light">+ </span></span>
+    </a>
+    <nav class="main-nav" aria-label="ניווט ראשי">
+      <a href="#" class="nav-link">שיטות פרמיה</a>
+      <a href="#" class="nav-link">מדדים</a>
+      <a href="#" class="nav-link active">קליטת נתונים</a>
+    </nav>
+    <div class="profile">
+      <span class="profile-name">שלום, מנהל מערכת</span>
+      <span class="avatar">מ</span>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="breadcrumb"><span>ראשי</span><span class="crumb-separator">/</span><span>קליטת נתונים</span></div>
+    <div class="page-heading">
+      <div>
+        <h1>קליטת נתונים למדד</h1>
+        <p>העלאת קובצי Excel, מעקב אחר קליטות וצפייה בנתונים</p>
+      </div>
+      <span class="environment-badge"><span class="live-dot"></span> סביבת הדגמה</span>
+    </div>
+
+    @if (errorMessage) {
+      <div class="alert error-alert" role="alert">
+        <span class="alert-icon">!</span>
+        <span>{{ errorMessage }}</span>
+        <button type="button" class="dismiss-button" aria-label="סגור הודעה" (click)="errorMessage = ''">×</button>
+      </div>
+    }
+    @if (successMessage) {
+      <div class="alert success-alert" role="status">
+        <span class="success-icon">✓</span>
+        <span>{{ successMessage }}</span>
+        <button type="button" class="dismiss-button" aria-label="סגור הודעה" (click)="successMessage = ''">×</button>
+      </div>
+    }
+
+    <section class="card selection-card" aria-labelledby="selection-title">
+      <div class="section-title-row">
+        <div class="section-icon purple">⌕</div>
+        <div>
+          <h2 id="selection-title">בחירת שיטה ומדד</h2>
+          <p>בחרו את המדד לצפייה בנתונים או לקליטת קובץ חדש</p>
+        </div>
+      </div>
+      <div class="selection-grid">
+        <label class="form-field">
+          <span>שיטת פרמיה</span>
+          <select [value]="selectedMethodId ?? ''" (change)="onMethodChange($event)">
+            <option value="">בחרו שיטת פרמיה</option>
+            @for (method of methods; track method.id) {
+              <option [value]="method.id">{{ method.number }} — {{ method.description }}</option>
+            }
+          </select>
+        </label>
+        <label class="form-field">
+          <span>מדד</span>
+          <select [value]="selectedMetricId ?? ''" (change)="onMetricChange($event)" [disabled]="metrics.length === 0">
+            <option value="">בחרו מדד</option>
+            @for (metric of metrics; track metric.id) {
+              <option [value]="metric.id">{{ metric.name }}</option>
+            }
+          </select>
+        </label>
+        <div class="selection-note">
+          <span class="note-icon">i</span>
+          <span>הנתונים מוצגים לפי הגדרות המבנה והשדות של המדד שנבחר.</span>
+        </div>
+      </div>
+      @if (selectedMetricId) {
+        <div class="metric-meta">
+          <span class="meta-label">מקור נתונים</span>
+          <span class="source-tag"><span class="excel-icon">X</span> {{ selectedMetric?.sourceType || 'Excel' }}</span>
+          <span class="meta-divider"></span>
+          <span class="meta-label">תדירות קליטה</span>
+          <strong>{{ selectedMetric?.ingestionFrequency || '—' }}</strong>
+        </div>
+      }
+    </section>
+
+    <section class="card upload-card" aria-labelledby="upload-title">
+      <div class="section-title-row">
+        <div class="section-icon green">↑</div>
+        <div>
+          <h2 id="upload-title">קליטת קובץ Excel</h2>
+          <p>הקובץ ייבדק ויקושר אוטומטית לגרסת המבנה המתאימה</p>
+        </div>
+        <span class="optional-badge">XLSX / XLS</span>
+      </div>
+      <form [formGroup]="importForm" (ngSubmit)="submitImport()">
+        <div class="upload-grid">
+          <label class="form-field">
+            <span>שנת דיווח <b class="required">*</b></span>
+            <input type="number" formControlName="reportingYear" min="1900" max="2200">
+            @if (importForm.controls['reportingYear'].touched && importForm.controls['reportingYear'].invalid) {
+              <small class="field-error">יש להזין שנה תקינה</small>
+            }
+          </label>
+          <label class="form-field">
+            <span>תקופת דיווח <b class="required">*</b></span>
+            <input type="text" formControlName="reportingPeriod" placeholder="לדוגמה: רבעון 1 או אפריל">
+            @if (importForm.controls['reportingPeriod'].touched && importForm.controls['reportingPeriod'].invalid) {
+              <small class="field-error">יש להזין תקופת דיווח</small>
+            }
+          </label>
+          <label class="form-field file-field" for="excel-file">
+            <span>קובץ נתונים <b class="required">*</b></span>
+            <span class="file-control">
+              <span class="choose-file">בחירת קובץ</span>
+              <span class="file-name">{{ selectedFile?.name || 'לא נבחר קובץ' }}</span>
+            </span>
+            <input id="excel-file" type="file" accept=".xlsx,.xls" (change)="onFileChange($event)">
+          </label>
+          <button class="primary-button upload-button" type="submit" [disabled]="uploading || !selectedMetricId">
+            @if (uploading) {
+              <span class="spinner"></span> הקובץ נקלט...
+            } @else {
+              <span>↑</span> קליטת נתונים
+            }
+          </button>
+        </div>
+      </form>
+      <div class="upload-hint"><span class="hint-icon">✓</span> הקובץ חייב לכלול שורת כותרות ייחודית. עמודות חדשות יתווספו כגרסת מבנה חדשה.</div>
+    </section>
+
+    <section class="card data-card" aria-labelledby="data-title">
+      <div class="data-heading">
+        <div class="section-title-row">
+          <div class="section-icon blue">▤</div>
+          <div>
+            <h2 id="data-title">נתונים שנקלטו</h2>
+            <p>צפייה, סינון ומיון של רשומות המדד</p>
+          </div>
+        </div>
+        <div class="data-actions">
+          <label class="batch-select">
+            <span>היסטוריית קליטה</span>
+            <select [value]="selectedBatchId ?? ''" (change)="onBatchChange($event)">
+              <option value="">כל הקליטות</option>
+              @for (batch of batches; track batch.id) {
+                <option [value]="batch.id">{{ batch.reportingYear }} · {{ batch.reportingPeriod }} · v{{ batch.schemaVersion }} · {{ batch.rowCount }} שורות</option>
+              }
+            </select>
+          </label>
+          <span class="total-badge">{{ totalCount.toLocaleString('he-IL') }} רשומות</span>
+        </div>
+      </div>
+
+      <form class="filters-panel" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+        <div class="filters-label"><span class="filter-icon">☷</span> סינון נתונים</div>
+        @for (field of filterableFields; track field.id) {
+          <label class="filter-field">
+            <span>{{ field.displayName }}</span>
+            @switch (field.dataType) {
+              @case ('number') {
+                <input type="text" inputmode="decimal" [formControlName]="field.key" placeholder="לדוגמה: >=100">
+              }
+              @case ('date') {
+                <input type="text" [formControlName]="field.key" placeholder="YYYY-MM-DD">
+              }
+              @case ('boolean') {
+                <select [formControlName]="field.key">
+                  <option value="">הכל</option><option value="true">כן</option><option value="false">לא</option>
+                </select>
+              }
+              @default {
+                <input type="text" [formControlName]="field.key" [placeholder]="'חיפוש ב' + field.displayName">
+              }
+            }
+          </label>
+        }
+        <div class="filter-actions">
+          <button class="primary-button small-button" type="submit">הצגת תוצאות</button>
+          <button class="text-button" type="button" (click)="resetFilters()">ניקוי סינון</button>
+        </div>
+      </form>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="row-number">#</th>
+              @for (field of visibleFields; track field.id) {
+                <th>
+                  <button type="button" class="sort-button" [disabled]="!field.isSortable" (click)="sort(field)">
+                    {{ field.displayName }}
+                    @if (sortBy === field.key) {
+                      <span class="sort-indicator">{{ descending ? '↓' : '↑' }}</span>
+                    } @else if (field.isSortable) {
+                      <span class="sort-hint">↕</span>
+                    }
+                  </button>
+                </th>
+              }
+              <th>מקור</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (loading) {
+              <tr><td class="empty-state" [attr.colspan]="visibleFields.length + 2"><span class="spinner dark-spinner"></span> טוען נתונים...</td></tr>
+            } @else if (rows.length === 0) {
+              <tr>
+                <td class="empty-state" [attr.colspan]="visibleFields.length + 2">
+                  <span class="empty-icon">▤</span>
+                  <strong>לא נמצאו רשומות</strong>
+                  <span>בחרו מדד או שנו את הסינון, או העלו קובץ חדש.</span>
+                </td>
+              </tr>
+            } @else {
+              @for (row of rows; track row.id; let rowIndex = $index) {
+                <tr>
+                  <td class="row-number">{{ (page - 1) * pageSize + rowIndex + 1 }}</td>
+                  @for (field of visibleFields; track field.id) {
+                    <td>{{ displayValue(row, field.key) }}</td>
+                  }
+                  <td><span class="excel-source"><span class="excel-icon">X</span> Excel</span></td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+      <footer class="table-footer">
+        <span>מציג {{ firstVisibleRow }}–{{ lastVisibleRow }} מתוך {{ totalCount.toLocaleString('he-IL') }} רשומות</span>
+        <div class="pagination">
+          <button type="button" aria-label="העמוד הבא" [disabled]="page >= pageCount || loading" (click)="changePage(1)">‹</button>
+          <span>עמוד <strong>{{ page }}</strong> מתוך {{ pageCount }}</span>
+          <button type="button" aria-label="העמוד הקודם" [disabled]="page <= 1 || loading" (click)="changePage(-1)">›</button>
+        </div>
+      </footer>
+    </section>
+
+    <section class="history-section" aria-label="היסטוריית הקליטות">
+      <h2>היסטוריית קליטות אחרונות</h2>
+      <div class="history-list">
+        @for (batch of batches.slice(0, 3); track batch.id) {
+          <button class="history-item" type="button" (click)="selectBatch(batch.id)">
+            <span class="history-status" [class.failed]="batch.status !== 'Completed'">{{ batch.status === 'Completed' ? '✓' : '!' }}</span>
+            <span class="history-file">{{ batch.originalFileName }}</span>
+            <span class="history-period">{{ batch.reportingYear }} · {{ batch.reportingPeriod }}</span>
+            <span class="history-count">{{ batch.rowCount }} שורות</span>
+            <span class="history-version">מבנה v{{ batch.schemaVersion }}</span>
+            <time>{{ batch.startedAtUtc | date:'dd/MM/yyyy HH:mm' }}</time>
+          </button>
+        } @empty {
+          <p class="history-empty">היסטוריית הקליטות תופיע כאן לאחר קליטת קובץ.</p>
+        }
+      </div>
+    </section>
+    <div class="page-footnote">מערכת ניהול פרמיות <span>·</span> כל הזכויות שמורות</div>
+  </main>
+</div>

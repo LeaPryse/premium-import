@@ -1,0 +1,20 @@
+# .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# SQLite database (created on startup)
+*.db
+*.db-shm
+*.db-wal
+
+# Angular / Node
+node_modules/
+.angular/
+dist/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
